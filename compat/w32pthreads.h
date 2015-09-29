@@ -37,7 +37,12 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#if !defined(WINAPI_FAMILY) || WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
 #include <process.h>
+#else
+#define TARGET_OS_WINRT
+#endif
+
 
 #include "libavutil/attributes.h"
 #include "libavutil/common.h"
@@ -82,8 +87,13 @@ static av_unused int pthread_create(pthread_t *thread, const void *unused_attr,
 {
     thread->func   = start_routine;
     thread->arg    = arg;
+#ifdef TARGET_OS_WINRT
+    thread->handle = (void*)CreateThread(NULL, 0, win32thread_worker, thread,
+                                           0, NULL);
+#else
     thread->handle = (void*)_beginthreadex(NULL, 0, win32thread_worker, thread,
                                            0, NULL);
+#endif
     return !thread->handle;
 }
 
