@@ -312,6 +312,10 @@ static void image_copy_plane(uint8_t       *dst, ptrdiff_t dst_linesize,
         return;
     av_assert0(abs(src_linesize) >= bytewidth);
     av_assert0(abs(dst_linesize) >= bytewidth);
+    if (src_linesize == dst_linesize && dst_linesize == bytewidth) {
+        memcpy(dst, src, bytewidth * height);
+        return;
+    }
     for (;height > 0; height--) {
         memcpy(dst, src, bytewidth);
         dst += dst_linesize;
